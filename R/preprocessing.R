@@ -1,6 +1,7 @@
 library(dplyr)
 library(tidyr)
 library(stringr)
+library(data.table)
 
 #' Load raw data from .csv file
 #'
@@ -30,20 +31,6 @@ load_and_parse <- function(filename) {
     mutate(respP = as.numeric(respCat=='p')) %>%
     mutate(bvotCond = as.factor(bvotCond)) %>%
     mutate(vot = as.numeric(str_extract(stimfn, '[-0-9]+')))
-}
-
-#' Set center, scale, and set contrasts for lmer modeling
-#'
-#' @param .data - Parsed data frame, with at least columns for vot, trial,
-#' bvotCond, and supCond
-mutate_for_lmer <- function(.data) {
-  .data %>%
-    ungroup %>%
-    mutate(vot_rel.s = scale((vot - as.numeric(as.character(bvotCond))) / 10,
-                             scale=FALSE),
-           trial.s = scale(trial / max(trial), scale=FALSE),
-           bvotCond.s = scale(as.numeric(as.character(bvotCond)) / 10, scale=FALSE),
-           supervised = scale(as.numeric(supCond) * -1, scale=FALSE))
 }
 
 #' Detect repeat subjects
