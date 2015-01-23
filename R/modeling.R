@@ -117,7 +117,7 @@ predict_and_plot <- function(dat, fit, show_se=FALSE, ...) {
   if (show_se) {
     form <- as.formula(lme4:::nobars(formula(fit))[-2])
     mm <- model.matrix(form, data=dat)
-    ses <- sqrt(diag(mm %*% tcrossprod(vcov(fit), mm)))
+    ses <- sqrt(diag(mm %*% tcrossprod(as.matrix(vcov(fit)), mm)))
     dat <- dat %>% mutate(pred.logodds.se=ses,
                           ci.logodds.low=pred.logodds - 1.96*pred.logodds.se,
                           ci.logodds.high=pred.logodds + 1.96*pred.logodds.se,
