@@ -47,9 +47,11 @@ rescale <- function(x, x.scaled) {
 #' (factor with range of trials as strings, ordered correctly).
 bin_trials <- function(data_, n_bins=3) {
   data_ %>%
+    group_by(trial) %>%
+    summarise() %>%
     mutate(thirds = ntile(trial, n_bins)) %>%
     group_by(thirds) %>%
-    summarise(trial_range = paste(min(trial), '-', max(trial)), 
+    summarise(trial_range = paste('Trials ', min(trial), '-', max(trial)), 
               trial = round(mean(trial))) %>%
     ungroup() %>%
     mutate(trial_range = factor(trial_range, levels=trial_range))
