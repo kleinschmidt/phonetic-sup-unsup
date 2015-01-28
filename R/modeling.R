@@ -133,3 +133,37 @@ predict_and_plot <- function(dat, fit, show_se=FALSE, ...) {
     return(p)
   }
 }
+
+#' Get the category boundary based on an glmer fit and model data
+#'
+#' Works by computing predictions at each level of bvotCond and supCond, for
+#' vot predictor of 0 (to get y intercept) and 1 (to get VOT slope).  Then finds
+#' the x intercept, and adjusts for how VOT is scaled and shifted to return the
+#' actual VOT value where the boundary is.
+#'
+#' @param dat_mod - Model input data (data.frame with at least columns for
+#' bvotCond, bvotCond.s, supervised (numeric supCond predictor), and supCond).
+#' @param fit - fitted glmer model object
+#' @param trials_prop - (default: 5/6) which point in the experiment to estimate
+#' the category boundary at.
+#' @return data.frame with columns bvotCond, supCond, and boundary_vot
+category_boundaries <- function(dat_mod, fit,
+                                trials_prop = 5/6) {
+  
+  boundary_pred_dat <- dat_mod %>%
+    group_by(bvotCond, bvotCond.s, supervised, supCond) %>%
+    summarise(trial.s = min(trial.s) + diff(range(trial.s))*trials_prop)
+  
+  ## predicted y intercept (vot_rel.s=0)
+  ## predicted slope is (vot_rel.s = 1) - (vot_rel.s = 0)  
+  
+  bounds <- boundary_pred_dat %>%
+    group_by(bvotCond, supCond) %>%
+    do(data_frame(y_int = predict(fit, mutate(., vot_rel.s=0), re.form=NA),
+                  y_one = predict(fit, mutate(., vot_rel.s=1), re.form=NA),
+                  x_int = -(y_int / (y_one-y_int)))) %>%
+    mutate(shift = as.numeric(as.character(bvotCond))) %>% 
+    transmute(boundary_vot = x_int*10 + shift + 20)
+
+  return(bounds)
+}
