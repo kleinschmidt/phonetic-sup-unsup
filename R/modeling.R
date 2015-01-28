@@ -82,7 +82,7 @@ make_prediction_data <- function(data_inc, data_mod) {
            bvotCond.s = rescale(as.numeric(as.character(bvotCond)) / 10,
              data_mod$bvotCond.s),
            supervised = rescale(as.numeric(supCond) * -1, data_mod$supervised),
-           type = factor('predicted', levels=c('actual', 'predicted')))
+           type = factor('fixed effects', levels=c('actual', 'fixed effects')))
 
   return(data_pred)
 }
@@ -128,7 +128,7 @@ predict_and_plot <- function(dat, fit, show_se=FALSE, ...) {
     return(p + geom_ribbon(aes(ymin=ci.low, ymax=ci.high, fill=bvotCond),
                            data=dat,
                            alpha=0.5,
-                           size=0))
+                           color=NA))
   } else {
     return(p)
   }
