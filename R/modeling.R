@@ -163,7 +163,8 @@ category_boundaries <- function(dat_mod, fit,
                   y_one = predict(fit, mutate(., vot_rel.s=1), re.form=NA),
                   x_int = -(y_int / (y_one-y_int)))) %>%
     mutate(shift = as.numeric(as.character(bvotCond))) %>% 
-    transmute(boundary_vot = x_int*10 + shift + 20)
+    transmute(boundary_vot = x_int*10 + shift + 20,
+              boundary_vot_true = shift+20)
 
   return(bounds)
 }
