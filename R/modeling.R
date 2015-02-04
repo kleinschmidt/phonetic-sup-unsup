@@ -87,6 +87,35 @@ make_prediction_data <- function(data_inc, data_mod) {
   return(data_pred)
 }
 
+#' Actually create a model matrix from a merMod object and new data (only
+#' fixed effects, and leaves out the y value).
+#' 
+#' @param fit - Fitted merMode object
+#' @param dat - New data to generate a model.matrix from. See model.matrix.
+mer_model_matrix <- function(fit, dat, ...) {
+  form <- as.formula(lme4:::nobars(formula(fit))[-2])
+  model.matrix(form, data=dat, ...)
+}
+
+#' Generate standard errors for predictions of a mixed effects
+#' model, based on the variance-covariance matrices of the fixed effects.
+#' Returns the standard error, (square root of variance), of the predictions
+#' by default, but can return the full variance-covariance matrix
+#'
+#' @param fit - Fitted merMod object
+#' @param dat - Data to generate fixed effects standard errors for
+#' @param full_covar=FALSE - Whether to return the full covariance matrix
+#' (instead of just the square root of the diagonal elements)
+predict_se <- function(fit, mm=mer_model_matrix(fit, dat),
+                       dat=NA, full_covar=FALSE) {
+  ## mm <- mer_model_matrix(fit, dat)
+  if (full_covar) {
+    return(mm %*% tcrossprod(as.matrix(vcov(fit)), mm))
+  } else {
+    return(sqrt(diag(mm %*% tcrossprod(as.matrix(vcov(fit)), mm))))
+  }
+}
+
 #' predict log-odds of /p/ responses based on just the fixed effects of the
 #' fitted model, and plot.
 #'
@@ -117,9 +146,7 @@ predict_and_plot <- function(dat, fit, show_se=FALSE, ...) {
     geom_line(aes(y=pred.resp)) +
     facet_grid(type~trial_range)
   if (show_se) {
-    form <- as.formula(lme4:::nobars(formula(fit))[-2])
-    mm <- model.matrix(form, data=dat)
-    ses <- sqrt(diag(mm %*% tcrossprod(as.matrix(vcov(fit)), mm)))
+    ses <- predict_se(fit, dat)
     dat <- dat %>% mutate(pred.logodds.se=ses,
                           ci.logodds.low=pred.logodds - 1.96*pred.logodds.se,
                           ci.logodds.high=pred.logodds + 1.96*pred.logodds.se,
