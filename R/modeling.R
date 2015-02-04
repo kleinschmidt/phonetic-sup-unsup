@@ -106,8 +106,8 @@ mer_model_matrix <- function(fit, dat, ...) {
 #' @param dat - Data to generate fixed effects standard errors for
 #' @param full_covar=FALSE - Whether to return the full covariance matrix
 #' (instead of just the square root of the diagonal elements)
-predict_se <- function(fit, mm=mer_model_matrix(fit, dat),
-                       dat=NA, full_covar=FALSE) {
+predict_se <- function(fit, dat=NA,
+                       mm=mer_model_matrix(fit, dat), full_covar=FALSE) {
   ## mm <- mer_model_matrix(fit, dat)
   if (full_covar) {
     return(mm %*% tcrossprod(as.matrix(vcov(fit)), mm))
