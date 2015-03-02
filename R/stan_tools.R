@@ -15,3 +15,33 @@ par_stan <- function(data,
                                       refresh = -1, ...))
   return(sflist2stanfit(sflist))
 }
+
+
+# convert data to stan input format
+supunsup_to_stan <- function(dat) {
+  within(list(), {
+    y <- dat %>%
+      group_by(subject, trial) %>%
+      select(vot) %>%
+      spread(key=subject, value=vot) %>%
+      select(-trial) %>%
+      as.matrix
+    
+    z <- dat %>%
+      group_by(subject, trial) %>%
+      transmute(respP = respP + 1) %>%
+      spread(key=subject, value=respP) %>%
+      select(-trial) %>%
+      as.matrix
+
+    N <- nrow(y)
+    M <- ncol(y)
+    K <- 2
+
+    ## prior hyperparameters
+    mu00 <- 30
+    mu0_sd <- 50
+    sigma00 <- 10
+    sigma0_scale <- 10
+  })
+}
