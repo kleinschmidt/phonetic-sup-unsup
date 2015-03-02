@@ -20,23 +20,17 @@ par_stan <- function(data,
 # convert data to stan input format
 supunsup_to_stan <- function(dat) {
   within(list(), {
-    y <- dat %>%
-      group_by(subject, trial) %>%
-      select(vot) %>%
-      spread(key=subject, value=vot) %>%
-      select(-trial) %>%
-      as.matrix
+    y <- dat$vot
     
-    z <- dat %>%
-      group_by(subject, trial) %>%
-      transmute(respP = respP + 1) %>%
-      spread(key=subject, value=respP) %>%
-      select(-trial) %>%
-      as.matrix
+    z <- dat$respP + 1
 
-    N <- nrow(y)
-    M <- ncol(y)
-    K <- 2
+    subject <- dat$subject %>%
+      factor %>%                        # drop missing subject levels
+      as.numeric
+
+    N <- length(y)
+    M <- max(subject)
+    K <- max(z)
 
     ## prior hyperparameters
     mu00 <- 30
