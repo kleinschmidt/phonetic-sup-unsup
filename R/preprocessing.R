@@ -30,7 +30,9 @@ load_and_parse <- function(filename) {
     mutate(respCat = as.factor(substr(targetId, 1, 1))) %>%
     mutate(respP = as.numeric(respCat=='p')) %>%
     mutate(bvotCond = as.factor(bvotCond)) %>%
-    mutate(vot = as.numeric(str_extract(stimfn, '[-0-9]+')))
+    mutate(vot = as.numeric(str_extract(stimfn, '[-0-9]+'))) %>%
+    mutate(labeled = ifelse(supCond == 'unsupervised', 'unlabeled',
+             ifelse(trialSupCond == 'unsupervised', 'unlabeled', 'labeled')))
 }
 
 #' Detect repeat subjects
