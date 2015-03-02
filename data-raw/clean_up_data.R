@@ -11,4 +11,4 @@ supunsup_excluded <- semi_join(supunsup, excludes,
 supunsup_clean <- anti_join(supunsup, excludes,
                             by=c('subject', 'assignmentid'))
 
-use_data(supunsup, excludes, supunsup_excluded, supunsup_clean)
+use_data(supunsup, excludes, supunsup_excluded, supunsup_clean, overwrite=TRUE)
