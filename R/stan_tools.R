@@ -68,7 +68,7 @@ mod_param_init <- function(dat) {
       mu0 <- apply(mu, 1, mean)
       sigma0 <- apply(sigma, 1, mean)
       ## prior pseudocounts
-      kappa <- nu <- rep(N / M, K)
+      log_kappa <- log_nu <- log(rep(N / M, K))
     })
   }
 }
