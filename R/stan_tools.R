@@ -39,3 +39,36 @@ supunsup_to_stan <- function(dat) {
     sigma0_scale <- 10
   })
 }
+
+# create initializer function from data with sensible parameter values
+mod_param_init <- function(dat) {
+  dat_temp <- with(dat, data.frame(vot=y, resp=z, subject=subject))
+  K <- dat$K
+  M <- dat$M
+  N <- dat$N
+  function() {
+    within(list(), {
+      logit_w_prior <- 0
+      theta <- rep(1/K, K)
+      ## category-by-subject mean VOTs
+      mu <- dat_temp %>%
+        group_by(subject, resp) %>%
+        summarise(vot = mean(vot)) %>%
+        spread(key = subject, value = vot) %>%
+        select(-resp) %>%
+        as.matrix
+      ## category-by-subject VOT sds
+      sigma <- dat_temp %>%
+        group_by(subject, resp) %>%
+        summarise(sd = sd(vot)) %>%
+        spread(key = subject, value = sd) %>%
+        select(-resp) %>%
+        as.matrix
+      ## grand mean of means and sds
+      mu0 <- apply(mu, 1, mean)
+      sigma0 <- apply(sigma, 1, mean)
+      ## prior pseudocounts
+      kappa <- nu <- rep(N / M, K)
+    })
+  }
+}
