@@ -9,7 +9,7 @@ License: GPL
 LazyData: true
 Imports:
     dplyr,
-    tidyr,
-    stringr,
     ggplot2,
-    lme4
+    lme4,
+    stringr,
+    tidyr,
