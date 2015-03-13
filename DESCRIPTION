@@ -7,3 +7,9 @@ Description: Analysis of data from supervised/unsupervised phonetic
 Depends: R (>= 3.1.1)
 License: GPL
 LazyData: true
+Imports:
+    dplyr,
+    tidyr,
+    stringr,
+    ggplot2,
+    lme4
