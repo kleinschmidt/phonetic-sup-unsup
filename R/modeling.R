@@ -10,13 +10,23 @@
 #'
 #' @export
 mutate_for_lmer <- function(.data) {
-  .data %>%
+  d <- .data %>%
     ungroup %>%
     mutate(vot_rel.s = scale((vot - as.numeric(as.character(bvotCond))) / 10,
                              scale=FALSE),
            trial.s = scale(trial / max(trial), scale=FALSE),
            bvotCond.s = scale(as.numeric(as.character(bvotCond)) / 10, scale=FALSE),
            supervised = scale(as.numeric(supCond) * -1, scale=FALSE))
+  
+  sup_cond_contrasts <- contr.sum(levels(d$supCond))
+  colnames(sup_cond_contrasts) <- levels(d$supCond)[-length(levels(d$supCond))]
+  contrasts(d$supCond) <- sup_cond_contrasts
+
+  vot_cond_contrasts <- contr.helmert(levels(d$bvotCond))
+  colnames(vot_cond_contrasts) <- levels(d$bvotCond)[-1]
+  contrasts(d$bvotCond) <- vot_cond_contrasts
+
+  return(d)
 }
 
 
@@ -170,9 +180,7 @@ predict_and_plot <- function(dat, fit, show_se=FALSE, ...) {
     geom_line(aes(y=pred.resp)) +
     facet_grid(type~trial_range)
   if (show_se) {
-    form <- as.formula(lme4:::nobars(formula(fit))[-2])
-    mm <- model.matrix(form, data=dat)
-    ses <- sqrt(diag(mm %*% tcrossprod(as.matrix(vcov(fit)), mm)))
+    ses <- predict_se(fit, dat)
     dat <- dat %>% mutate(pred.logodds.se=ses,
                           ci.logodds.low=pred.logodds - 1.96*pred.logodds.se,
                           ci.logodds.high=pred.logodds + 1.96*pred.logodds.se,
@@ -211,14 +219,38 @@ category_boundaries <- function(dat_mod, fit,
   
   ## predicted y intercept (vot_rel.s=0)
   ## predicted slope is (vot_rel.s = 1) - (vot_rel.s = 0)  
-  
-  bounds <- boundary_pred_dat %>%
+
+  bounds <- boundary_pred_dat %>% 
     group_by(bvotCond, supCond) %>%
-    do(data_frame(y_int = predict(fit, mutate(., vot_rel.s=0), re.form=NA),
-                  y_one = predict(fit, mutate(., vot_rel.s=1), re.form=NA),
-                  x_int = -(y_int / (y_one-y_int)))) %>%
+    do({
+      ## model matrix: intercept and slope
+      mm <- matrix(c(1, 0, -1, 1), nrow=2, byrow=TRUE) %*%
+        rbind(mer_model_matrix(fit, mutate(., vot_rel.s=0)),
+              mer_model_matrix(fit, mutate(., vot_rel.s=1)))
+      ## predicted intercept and slope
+      pred <- mm %*% fixef(fit)
+      pred_covar <- predict_se(fit, mm=mm, full_covar=TRUE)
+      x_int <- -pred[1] / pred[2]
+      ## shamelessly copied from http://www.stat.cmu.edu/~hseltman/files/ratio.pdf
+      x_int_var <- x_int^2 * 
+        (pred_covar[1,1]/pred[1]^2 - 
+           2*pred_covar[1,2]/(pred[1]*pred[2]) + 
+           pred_covar[2,2]/pred[2]^2)
+
+      ## just to satisfy myself that this is a reasonable approximation
+      ## samps <- rmvnorm(n=1000000, mean=pred, sigma=pred_covar)
+      ## samps_ratio = - samps[, 1] / samps[, 2]
+      ## print(c(mean(samps_ratio), x_int, sd(samps_ratio), sqrt(x_int_var)))
+      
+      data.frame(y_int=pred[1],
+                 slope=pred[2],
+                 x_int=x_int,
+                 x_int_var=x_int_var)
+    }) %>%
     mutate(shift = as.numeric(as.character(bvotCond))) %>% 
-    transmute(boundary_vot = x_int*10 + shift + 20)
+    mutate(boundary_vot = x_int*10 + shift + 20,
+              boundary_vot_se = sqrt(x_int_var) * 10,
+              boundary_vot_true = shift+20)
 
   return(bounds)
 }
