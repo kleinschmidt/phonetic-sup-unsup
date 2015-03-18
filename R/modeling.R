@@ -1,10 +1,12 @@
-library(lme4)
-
-
-#' Set center, scale, and set contrasts for lmer modeling
+#' Prepare for `glmer`
 #'
-#' @param .data - Parsed data frame, with at least columns for vot, trial,
-#' bvotCond, and supCond
+#' Set center, scale, and set contrasts for lmer modeling.  Variables are
+#' created both for shift-as-continuous predictor (bvotCond.s) and shift-
+#' as-categorical (bvotCond, Helmert Coding).  Likewise for supervision
+#' (supervised and supCond).
+#'
+#' @param .data Parsed data frame, with at least columns for vot, trial,
+#' bvotCond, and supCond (e.g., `data(supunsup)`)
 mutate_for_lmer <- function(.data) {
   .data %>%
     ungroup %>%
@@ -16,11 +18,13 @@ mutate_for_lmer <- function(.data) {
 }
 
 
+#' Scale, again
+#'
 #' Helper function that rescales one variable based on another (previously
 #' scaled), handling presence or absence of centering or scaling appropriately
 #'
-#' @param x - vector that needs to be scaled.
-#' @param x.scaled - vector that was already scaled.
+#' @param x vector that needs to be scaled.
+#' @param x.caled vector that was already scaled.
 #' 
 rescale <- function(x, x.scaled) {
   x.rescaled <- as.matrix(x)
@@ -41,8 +45,8 @@ rescale <- function(x, x.scaled) {
 
 #' Split data_$trial into n bins.
 #'
-#' @param data_ - data.frame with at least a `trial` column.
-#' @param n_bins - How many bins to split the trials into (defaults to 3)
+#' @param data_ data.frame with at least a `trial` column.
+#' @param n_bins How many bins to split the trials into (defaults to 3)
 #' @return - A data.frame with columns trial (mean trial in bin) and trial_range
 #' (factor with range of trials as strings, ordered correctly).
 bin_trials <- function(data_, n_bins=3) {
@@ -57,10 +61,12 @@ bin_trials <- function(data_, n_bins=3) {
     mutate(trial_range = factor(trial_range, levels=trial_range))
 }
 
+#' Data for prediction
+#'
 #' Generate a data.frame suitable for passing to lme4::predict.merMod.
 #'
-#' @param data_inc - Raw data, what was used to generate the model input
-#' @param data_mod - Model input (raw data at least passed through mutate_for_lmer)
+#' @param data_inc Raw data, what was used to generate the model input
+#' @param data_mod Model input (raw data at least passed through mutate_for_lmer)
 #' 
 make_prediction_data <- function(data_inc, data_mod) {
   trial_thirds <- bin_trials(data_inc, 3)
@@ -87,13 +93,52 @@ make_prediction_data <- function(data_inc, data_mod) {
   return(data_pred)
 }
 
+#' The missing method
+#'
+#' Actually create a model matrix from a merMod object and new data (only
+#' fixed effects, and leaves out the y value).
+#' 
+#' @param fit Fitted merModel object
+#' @param dat New data to generate a model.matrix from. See model.matrix.
+#'
+#' @export
+mer_model_matrix <- function(fit, dat, ...) {
+  form <- as.formula(lme4:::nobars(formula(fit))[-2])
+  model.matrix(form, data=dat, ...)
+}
+
+#' Fixed effect prediction SEs
+#'
+#' Generate standard errors for predictions of a mixed effects
+#' model, based on the variance-covariance matrices of the fixed effects.
+#' Returns the standard error, (square root of variance), of the predictions
+#' by default, but can return the full variance-covariance matrix
+#'
+#' @param fit Fitted merMod object
+#' @param dat Data to generate fixed effects standard errors for
+#' @param full_covar (Default: FALSE) Whether to return the full covariance matrix
+#' (instead of just the square root of the diagonal elements)
+#'
+#' @export
+predict_se <- function(fit, dat=NA,
+                       mm=mer_model_matrix(fit, dat), full_covar=FALSE) {
+  ## mm <- mer_model_matrix(fit, dat)
+  if (full_covar) {
+    return(mm %*% tcrossprod(as.matrix(vcov(fit)), mm))
+  } else {
+    return(sqrt(diag(mm %*% tcrossprod(as.matrix(vcov(fit)), mm))))
+  }
+}
+
+#' Visualize model fit
+#'
 #' predict log-odds of /p/ responses based on just the fixed effects of the
 #' fitted model, and plot.
 #'
-#' @param dat - data suitable for calling lme4::predict.merMod (e.g. output of
+#' @param dat Data suitable for calling lme4::predict.merMod (e.g. output of
 #' make_prediction_data).
-#' @param fit - glmer fitted model.
-#' @param show_se=FALSE - whether or not to draw the confidence intervals
+#' @param fit glmer fitted model.
+#' @param show_se (default: FALSE) whether or not to draw the confidence intervals
 #' (based on the standard error of the fixed effects).
 #' @return The ggplot2 plot object.
 #' @examples
@@ -106,6 +151,8 @@ make_prediction_data <- function(data_inc, data_mod) {
 #' data_pred <- make_prediction(data_inc, data_mod)
 #' predict_and_plot(data_pred, fit, show_se=TRUE)
 #' }
+#'
+#' @export
 predict_and_plot <- function(dat, fit, show_se=FALSE, ...) {
   dat$pred.logodds <- predict(fit, dat, re.form=NA)
   ## convert log odds to probability /p/ response
@@ -141,12 +188,14 @@ predict_and_plot <- function(dat, fit, show_se=FALSE, ...) {
 #' the x intercept, and adjusts for how VOT is scaled and shifted to return the
 #' actual VOT value where the boundary is.
 #'
-#' @param dat_mod - Model input data (data.frame with at least columns for
+#' @param dat_mod Model input data (data.frame with at least columns for
 #' bvotCond, bvotCond.s, supervised (numeric supCond predictor), and supCond).
-#' @param fit - fitted glmer model object
-#' @param trials_prop - (default: 5/6) which point in the experiment to estimate
+#' @param fit Fitted glmer model object
+#' @param trials_prop (Default: 5/6) which point in the experiment to estimate
 #' the category boundary at.
 #' @return data.frame with columns bvotCond, supCond, and boundary_vot
+#'
+#' @export
 category_boundaries <- function(dat_mod, fit,
                                 trials_prop = 5/6) {
   

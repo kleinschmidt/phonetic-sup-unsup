@@ -1,7 +1,5 @@
-library(dplyr)
-library(tidyr)
-library(stringr)
-library(data.table)
+#' These are functions for pre-processing raw data, including calculating
+#' exclusions based on repeat HITs and poor performance.
 
 #' Load raw data from .csv file
 #'
@@ -23,6 +21,8 @@ library(data.table)
 #' @param filename - Filename of the data file to load.
 #' @examples
 #' data <- load_and_parse('data/supunsup-ALL-visworld.csv')
+#'
+#' @export
 load_and_parse <- function(filename) {
   tbl_df(read.csv(filename, header=TRUE)) %>%
     separate(blockname, c('block', 'supCond', 'bvotCond'), sep='_', convert=TRUE) %>%
@@ -40,6 +40,8 @@ load_and_parse <- function(filename) {
 #' @param data - Parsed data frame
 #' @return A data.frame with one row per assignment, and the rank of the
 #' submittime of each.  Rank > 1 means it's a repeat for that subject
+#'
+#' @export
 repeat_subjects <- function(data_) {
   data_ %>% 
     group_by(assignmentid,submittime,subject) %>%
@@ -60,7 +62,15 @@ repeat_subjects <- function(data_) {
 #' /p/.  So we'll set a cutoff of 80% "correct" at either end (meaning
 #' logodds of a /p/ response greater than about 1.4 (`qlogis(0.8)`) at
 #' the /p/ end of 70ms and less than -1.4 at the /b/ end.
-#' 
+#'
+#' @param data_ - Parsed data frame
+#' @return A data.frame of subjects/assignments with columns `lo0ms`, `lo70ms`
+#' (GLM-predicted log odds at 0 and 70ms VOT), `loMinCorrect` (the minimum
+#' log-odds of a correct response, between 0ms and 70ms VOT), and
+#' `exclude80PercentAcc` (whether this assignment is excluded by the criterion
+#' of at least 80% accuracy on 0ms and 70ms VOT).
+#'
+#' @export
 bad_classification <- function(data_) {
   contrasts(data_$trialSupCond) <-
     matrix(c(1, -1), nrow=2,
@@ -80,12 +90,16 @@ bad_classification <- function(data_) {
     mutate(exclude80PercentAcc = loMinCorrect < qlogis(0.8))
 }
 
+#' Apply exclusion criteria
+#'
 #' List assignments to exclude from analysis for poor performance or repeats
 #'
 #' @param data - parsed data frame.
 #' @return A data.frame with one row per excluded assignment.  Column `rank` has
 #' n>1 for repeat takers, and NA otherwise.  Column loMinCorrect has the minimum
 #' log-odds correct for either endpoint of the continuum (0ms or 70ms VOT).
+#'
+#' @export
 exclusions <- function(data_) {
   repeats <- repeat_subjects(data_)
   bad_subjects <- bad_classification(data_)

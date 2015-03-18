@@ -1,11 +1,11 @@
-Package: analysis
+Package: supunsup
 Title: Supervised/unsupervised adaptation analysis
 Version: 0.0.0.9000
-Authors@R: "Dave Kleinschmidt <dave.f.kleinschmidt@gmail.com> [aut, cre]"
+Authors@R: as.person("Dave F. Kleinschmidt <dave.f.kleinschmidt@gmail.com> [aut, cre]")
 Description: Analysis of data from supervised/unsupervised phonetic
     adaptation study.
 Depends: R (>= 3.1.1)
-License: GPL
+License: MIT
 LazyData: true
 Imports:
     dplyr,
