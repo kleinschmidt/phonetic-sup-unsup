@@ -5,6 +5,7 @@
 #'
 #' @param .data Data frame with at least vot, respP, bvotCond, and supCond
 #' (like what is returned by load_and_parse()
+#' 
 #' @export
 plot_class_curve <- function(.data, ...) {
   ggplot(.data, aes(x=vot, y=respP, color=bvotCond, linetype=supCond), ...) +

@@ -7,6 +7,8 @@
 #'
 #' @param .data Parsed data frame, with at least columns for vot, trial,
 #' bvotCond, and supCond (e.g., `data(supunsup)`)
+#'
+#' @export
 mutate_for_lmer <- function(.data) {
   .data %>%
     ungroup %>%
@@ -25,7 +27,8 @@ mutate_for_lmer <- function(.data) {
 #'
 #' @param x vector that needs to be scaled.
 #' @param x.caled vector that was already scaled.
-#' 
+#'
+#' @export
 rescale <- function(x, x.scaled) {
   x.rescaled <- as.matrix(x)
   if (! is.null(attr(x.scaled, 'scaled:center'))) {
@@ -49,6 +52,8 @@ rescale <- function(x, x.scaled) {
 #' @param n_bins How many bins to split the trials into (defaults to 3)
 #' @return - A data.frame with columns trial (mean trial in bin) and trial_range
 #' (factor with range of trials as strings, ordered correctly).
+#'
+#' @export
 bin_trials <- function(data_, n_bins=3) {
   data_ %>%
     group_by(trial) %>%
@@ -67,7 +72,8 @@ bin_trials <- function(data_, n_bins=3) {
 #'
 #' @param data_inc Raw data, what was used to generate the model input
 #' @param data_mod Model input (raw data at least passed through mutate_for_lmer)
-#' 
+#'
+#' @export
 make_prediction_data <- function(data_inc, data_mod) {
   trial_thirds <- bin_trials(data_inc, 3)
 
