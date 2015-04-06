@@ -7,9 +7,11 @@ Description: Analysis of data from supervised/unsupervised phonetic
 Depends: R (>= 3.1.1)
 License: MIT
 LazyData: true
-Imports:
+Imports: 
     dplyr,
     ggplot2,
     lme4,
     stringr,
     tidyr,
+Suggests: knitr
+VignetteBuilder: knitr

@@ -1,0 +1,78 @@
+---
+title: "Comparing shifts for followup studies"
+author: "Dave Kleinschmidt"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Comparing shifts for followup studies}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+# What and why
+
+* Want to run follow-up studies that depend on people classifying particular pairs of stimuli as the same or different
+* Need to find two conditions shifted by 20ms relative to each other, which maximize the difference in the critical comparisons
+
+```{r setup}
+library(supunsup)
+library(dplyr)
+library(knitr)
+
+knitr::opts_chunk$set(fig.retina=2,
+                      dev='png')
+
+d <- load_and_parse('../../hits/data/supunsup.minusten-hack-visworld.csv')
+dd <- supunsup::supunsup_clean %>% filter(supCond == 'unsupervised')
+
+dat <- rbind(d, dd)
+
+```
+
+# GLM-based analysis
+
+Strategy: look at logistic regression fits for each subject, pull out cateogry boundary, and compare.
+
+```{r glm-analysis}
+
+fits <- dat %>%
+  group_by(subject, bvotCond) %>%
+  do(fit= glm(respP ~ vot, data=., family='binomial')) %>%
+  mutate(int = coef(fit)[1], slope = coef(fit)[2], xint = -int/slope)
+
+ggplot(filter(fits, abs(xint)<100), aes(y=xint, x=bvotCond)) + geom_boxplot() + geom_point(position='jitter') +coord_flip()
+
+```
+
+# Probability same- or different-classification
+
+Look directly at whether or not the relevant pairs are classified as the same or different.
+
+```{r, fig.width=11, fig.height=3}
+dat %>%
+  filter(bvotCond %in% c(-10, 10),
+         vot %in% seq(-20, 70, by=20)) %>%
+  group_by(subject, bvotCond, vot) %>% 
+  summarise(respP = mean(respP)) %>%
+  ggplot(aes(x=vot, y=respP, color=bvotCond)) + geom_line(aes(group=subject))
+
+
+## probability of "same" for pairs of stimuli separated by 20ms
+dat %>%
+  group_by(bvotCond, subject, vot) %>%
+  summarise(respP = mean(respP)) %>%
+  mutate(prob_same = lag(respP) * lead(respP) + (1-lag(respP)) * (1-lead(respP)),
+         vot_pair = paste(lag(vot), lead(vot))) %>%
+  filter(!is.na(prob_same)) %>%
+  group_by(bvotCond, vot, vot_pair, subject) %>%
+  summarise(prob_same = mean(prob_same)) %>%
+  mutate(vot_rel = vot - as.numeric(as.character(bvotCond))) %>%
+  filter(mod(vot_rel, 20) == 0) %>%
+  ggplot(aes(x=vot, y=prob_same, color=bvotCond)) +
+  geom_point(position='jitter') +
+  geom_pointrange(stat='summary', fun.data='mean_cl_boot') + 
+  facet_grid(.~bvotCond)
+
+```
+
+There's really not much of a difference between -10 and 20.  Looks like the -10/10 pair might have a **slight** edge over the 0/20.  But it's close.
