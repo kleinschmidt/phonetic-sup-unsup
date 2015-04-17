@@ -17,7 +17,9 @@ vignette: >
 ```{r setup}
 library(supunsup)
 library(dplyr)
+library(magrittr)
 library(knitr)
+library(ggplot2)
 
 knitr::opts_chunk$set(fig.retina=2,
                       dev='png')
