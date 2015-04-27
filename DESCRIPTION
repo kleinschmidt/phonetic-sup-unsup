@@ -13,5 +13,5 @@ Imports:
     lme4,
     stringr,
     tidyr,
-Suggests: knitr
+Suggests: knitr, parallel, rstan
 VignetteBuilder: knitr

@@ -1,6 +1,27 @@
 require(parallel)
 require(rstan)
 
+#' Run stan chains in parallel
+#'
+#' Uses `mclapply` as backend, and `sflist2stanfit` to convert to a single,
+#' multi-chain `stanfit` object.  If you don't supply the `fit` parameter
+#' (previously compiled Stan model object) then it will compile one and re-use
+#' it for all the chains.  Returns a single
+#'
+#' @return A single `stanfit` object with `chains` chains.
+#'
+#' @param data same as `stan`
+#' @param file filename for a stan model file.  ignored if `fit` also
+#' specified.
+#' @param fit fitted `stan` object.  Overrides any provided `file` argument.
+#' @param chains number of chains to run (default: 4).
+#' @param cores number of cores to use, which controls how many chains can be
+#' run simultaneously. (passed to `mclapply`, so see there for more information)
+#' (default: `chains`)
+#' @param rng_seed optional, passed to each chain.  (default: 1).
+#' @param ... additional arguments passed to `stan` for each chain.
+#'
+#' @export
 par_stan <- function(data,
                      file,
                      fit = stan(file, data=data, chains=0),
