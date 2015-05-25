@@ -38,7 +38,9 @@ par_stan <- function(data,
 }
 
 
-# convert data to stan input format
+#' convert data to stan input format
+#'
+#' @export
 supunsup_to_stan <- function(dat) {
   within(list(), {
     y <- dat$vot
@@ -61,7 +63,8 @@ supunsup_to_stan <- function(dat) {
   })
 }
 
-# create initializer function from data with sensible parameter values
+#' create initializer function from data with sensible parameter values
+#' @export
 mod_param_init <- function(dat) {
   dat_temp <- with(dat, data.frame(vot=y, resp=z, subject=subject))
   K <- dat$K
