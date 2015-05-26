@@ -1,3 +1,6 @@
+#' Generate the parsed data files included with the package.
+#' 
+
 library(devtools)
 devtools::load_all()
 
