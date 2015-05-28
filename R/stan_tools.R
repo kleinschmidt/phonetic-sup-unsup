@@ -56,10 +56,10 @@ supunsup_to_stan <- function(dat) {
     K <- max(z)
 
     ## prior hyperparameters
-    mu00 <- 30
-    mu0_sd <- 50
-    sigma00 <- 10
-    sigma0_scale <- 10
+    mu_00 <- 30
+    mu_0_sd <- 50
+    sigma_00 <- 10
+    sigma_0_scale <- 10
   })
 }
 
