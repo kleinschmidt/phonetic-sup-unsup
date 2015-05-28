@@ -38,10 +38,10 @@ par_stan <- function(data,
 }
 
 
-#' convert data to stan input format
+#' convert data to stan input format for the mog_*.stan models
 #'
 #' @export
-supunsup_to_stan <- function(dat) {
+supunsup_to_stan_mog <- function(dat) {
   within(list(), {
     y <- dat$vot
     
@@ -62,6 +62,42 @@ supunsup_to_stan <- function(dat) {
     sigma_0_scale <- 10
   })
 }
+
+#' convert data to stan input format for the conj_*.stan models
+#'
+#' @export
+supunsup_to_stan_conj <- function(dat) {
+
+  dat %>%
+    filter(supCond == 'unsupervised') %>%
+    mutate(trueCat = respCategory,
+           subjNum = as.numeric(factor(subject)),
+           trueCatNum = as.numeric(trueCat),
+           respCatNum = as.numeric(respCat))
+
+  test_responses <- dat %>%
+    group_by(subjNum, vot, respCat) %>%
+    tally %>%
+    spread(key=respCat, value=n, fill=0)
+
+  within(list(), {
+    x <- dat_behav$vot
+    y <- dat_behav$subjNum
+    z <- dat_behav$trueCatNum
+
+    n <- length(x)                        # num training observations
+    m <- length(unique(z))                # num categories
+    l <- length(unique(y))                # num subjects
+    
+    x_test <- test_responses$vot
+    y_test <- test_responses$subjNum
+    z_test_counts <- test_responses %>% select(b:p) %>% as.matrix
+
+    n_test <- length(x_test)
+  })
+  
+}
+
 
 #' create initializer function from data with sensible parameter values
 #' @export
@@ -89,11 +125,11 @@ mod_param_init <- function(dat) {
         select(-resp) %>%
         as.matrix
       ## grand mean of means and sds
-      mu0 <- apply(mu, 1, mean)
+      mu_0 <- apply(mu, 1, mean)
       mu_sigma <- apply(mu, 1, sd)
-      sigma0 <- apply(sigma, 1, mean)
+      sigma_0 <- apply(sigma, 1, mean)
       ## prior pseudocounts
-      log_kappa <- log_nu <- log(rep(N / M, K))
+      kappa_0 <- nu_0 <- N / M
     })
   }
 }
