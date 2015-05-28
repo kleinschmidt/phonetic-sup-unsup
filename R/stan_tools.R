@@ -90,6 +90,7 @@ mod_param_init <- function(dat) {
         as.matrix
       ## grand mean of means and sds
       mu0 <- apply(mu, 1, mean)
+      mu_sigma <- apply(mu, 1, sd)
       sigma0 <- apply(sigma, 1, mean)
       ## prior pseudocounts
       log_kappa <- log_nu <- log(rep(N / M, K))
