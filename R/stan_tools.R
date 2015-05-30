@@ -81,9 +81,9 @@ supunsup_to_stan_conj <- function(dat) {
     spread(key=respCat, value=n, fill=0)
 
   within(list(), {
-    x <- dat_behav$vot
-    y <- dat_behav$subjNum
-    z <- dat_behav$trueCatNum
+    x <- dat$vot
+    y <- dat$subjNum
+    z <- dat$trueCatNum
 
     n <- length(x)                        # num training observations
     m <- length(unique(z))                # num categories
