@@ -1,5 +1,6 @@
 require(parallel)
 require(rstan)
+require(magrittr)
 
 #' Run stan chains in parallel
 #'
@@ -118,16 +119,17 @@ mod_param_init <- function(dat) {
         select(-resp) %>%
         as.matrix
       ## category-by-subject VOT sds
-      sigma <- dat_temp %>%
+      sigma_sq <- dat_temp %>%
         group_by(subject, resp) %>%
         summarise(sd = sd(vot)) %>%
         spread(key = subject, value = sd) %>%
         select(-resp) %>%
-        as.matrix
+        as.matrix %>%
+        raise_to_power(2)
       ## grand mean of means and sds
       mu_0 <- apply(mu, 1, mean)
       mu_sigma <- apply(mu, 1, sd)
-      sigma_0 <- apply(sigma, 1, mean)
+      sigma_0 <- apply(sqrt(sigma_sq), 1, mean)
       ## prior pseudocounts
       kappa_0 <- nu_0 <- N / M
     })
