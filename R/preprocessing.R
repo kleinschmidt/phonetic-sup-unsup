@@ -65,31 +65,40 @@ repeat_subjects <- function(data_) {
 #' logodds of a /p/ response greater than about 1.4 (`qlogis(0.8)`) at
 #' the /p/ end of 70ms and less than -1.4 at the /b/ end.
 #'
-#' @param data_ - Parsed data frame
-#' @return A data.frame of subjects/assignments with columns `lo0ms`, `lo70ms`
-#' (GLM-predicted log odds at 0 and 70ms VOT), `loMinCorrect` (the minimum
-#' log-odds of a correct response, between 0ms and 70ms VOT), and
+#' @param data_ Parsed data frame
+#' @param vots = c(0,70) where to check predicted classification.
+#' @return A data.frame of subjects/assignments with column
 #' `exclude80PercentAcc` (whether this assignment is excluded by the criterion
-#' of at least 80% accuracy on 0ms and 70ms VOT).
+#' of at least 80% accuracy on 0ms and 70ms VOT). also includes min_correct_logodds.
 #'
 #' @export
-bad_classification <- function(data_) {
-  contrasts(data_$trialSupCond) <-
-    matrix(c(1, -1), nrow=2,
-           dimnames = list(c('sup', 'unsup'), 'sup'))
-
+bad_classification <- function(data_, vots=c(0, 70)) {
   ## Fit GLM to each subject/assignment
-  bysub_withsup_glms <- data_ %>%
-    group_by(subject, assignmentid) %>%
-    do(fit = glm(respP ~ vot * trialSupCond, data=., family='binomial'))
+  if (length(unique(data_$trialSupCond)) > 1) {
+    sup_contrasts <-
+      matrix(c(1, -1), nrow=2,
+             dimnames = list(c('sup', 'unsup'), 'sup'))
+    fit_glm <- function(d) glm(respP ~ vot * trialSupCond, data=d, family='binomial',
+                               contrasts = list(trialSupCond = sup_contrasts))
+  } else {
+    fit_glm <- function(d) glm(respP ~ vot, data=d, family='binomial')
+  }
+
+  d <- data_frame(vot=vots, correct=c(-1,1))
 
   ## Get fitted log-odds for 0ms and 70ms stimuli, find minimum correct log-odds,
   ## and mark people for exclusion if the minimum correct less than logit(80%)
-  bysub_withsup_end_logodds <- bysub_withsup_glms %>%
-    mutate(lo0ms = coef(fit)[1], lo70ms = coef(fit)[1] + 70*coef(fit)[2]) %>%
-    select(subject, assignmentid, lo0ms, lo70ms) %>%
-    mutate(loMinCorrect = min(lo0ms * -1, lo70ms)) %>%
-    mutate(exclude80PercentAcc = loMinCorrect < qlogis(0.8))
+  data_ %>%
+    group_by(subject, assignmentid) %>%
+    tidyr::nest() %>%
+    mutate(fit = purrr::map(data, fit_glm),
+           logodds = purrr::map(fit, ~ d %>% mutate(pred=predict(.x, d)))) %>%
+    tidyr::unnest(logodds) %>%
+    mutate(correct_logodds = correct * pred) %>%
+    group_by(subject, assignmentid) %>%
+    summarise(min_correct_logodds = min(correct_logodds)) %>%
+    mutate(exclude80PercentAcc = min_correct_logodds < qlogis(0.8))
+
 }
 
 #' Apply exclusion criteria
