@@ -9,7 +9,7 @@
 supunsup_excluded
 }
 \description{
-Data from excluded assignments.
+Data from excluded assignments in \code{\link{supunsup}}.
 }
 \keyword{datasets}
 

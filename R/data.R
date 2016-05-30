@@ -113,12 +113,12 @@
 
 #' Supunsup_clean
 #'
-#' The clean data set, with excluded assignments removed.
+#' The clean \code{\link{supunsup}} data set, with excluded assignments removed.
 "supunsup_clean"
 
 #' Supunsup_excluded
 #'
-#' Data from excluded assignments.
+#' Data from excluded assignments in \code{\link{supunsup}}.
 "supunsup_excluded"
 
 #' Some reasonable priors on category means/variances
@@ -141,3 +141,56 @@
 #' \item{\code{source}}{Source of this estimate ('goldrick2013' or 'kronrod2012')}
 #' }
 "prior_stats"
+
+#' Separate means dataset.
+#'
+#' Data from a follow-up experiment that manipulated /b/ and /p/ mean VOTs
+#' separately, using only unsupervised distributional learning. There are five
+#' conditions: (-80,50), (-50,50), (-20,50), (10,50), (10,80). The cleaned
+#' dataset (with random responders removed) is \code{separatemeans_clean}, and
+#' the excluded data is in \code{separatemeans_excluded}. Assignment metadata
+#' (including audioequipment and useragent is in
+#' \code{separatemeans_assignments}
+#' 
+#' Because of the greater separation between clusters this introduces, there's
+#' an additional test phase after the main part of the experiment, where
+#' subjects classify a flat continuum from -10ms to 50ms VOT, repeated 10 times
+#' each.
+#'
+#' @format The main dataset is a data.frame/tbl_df with 36,208
+#'   observations of 57 variables.  It has the columns from
+#'   \code{\link{supunsup}}, plus
+#'   \describe{
+#'   \item{\code{pvotCond}}{Mean VOT of /p/ distribution}
+#'   \item{\code{is_test}}{TRUE for test block, FALSE for exposure block}
+#'   }
+#'
+#'   The assignments metadata is a data.frame/tbl_df with 124 observations of 10
+#'   variables:
+#'   \describe{
+#'   \item{subject}{Anonymized worker ID}
+#'   \item{assignmentid}{MTurk assignment ID}
+#'   \item{hitid}{MTurk HIT ID}
+#'   \item{accepttime}{When assignment was accepted}
+#'   \item{submittime}{When assignment was submitted}
+#'   \item{audioequip}{Subjects' self-reported audio equipment}
+#'   \item{comments}{Subjects' comments after completing the experiment. The
+#'   prompt was "Enter any comments you have below.  Did anything seem weird?  Were
+#'   you hearing anything besides the choices we gave you?"}
+#'   \item{errors}{Not used in this experiment}
+#'   \item{practiceResp}{Not used in this experiment}
+#'   \item{userAgent}{The browser userAgent string.}
+#'   }
+"separatemeans"
+
+#' Subjects classifying at less than 80% accuracy as extrapolated by a GLM at
+#' -10 and 80ms VOT are excluded
+#'
+#' @rdname separatemeans
+"separatemeans_clean"
+
+#' @rdname separatemeans
+"separatemeans_excluded"
+
+#' @rdname separatemeans
+"separatemeans_assignments"

@@ -9,7 +9,7 @@
 supunsup_clean
 }
 \description{
-The clean data set, with excluded assignments removed.
+The clean \code{\link{supunsup}} data set, with excluded assignments removed.
 }
 \keyword{datasets}
 

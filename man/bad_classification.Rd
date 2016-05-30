@@ -4,17 +4,17 @@
 \alias{bad_classification}
 \title{Detect poor performers}
 \usage{
-bad_classification(data_)
+bad_classification(data_, vots = c(0, 70))
 }
 \arguments{
-\item{data_}{- Parsed data frame}
+\item{data_}{Parsed data frame}
+
+\item{vots}{= c(0,70) where to check predicted classification.}
 }
 \value{
-A data.frame of subjects/assignments with columns `lo0ms`, `lo70ms`
-(GLM-predicted log odds at 0 and 70ms VOT), `loMinCorrect` (the minimum
-log-odds of a correct response, between 0ms and 70ms VOT), and
+A data.frame of subjects/assignments with column
 `exclude80PercentAcc` (whether this assignment is excluded by the criterion
-of at least 80% accuracy on 0ms and 70ms VOT).
+of at least 80% accuracy on 0ms and 70ms VOT). also includes min_correct_logodds.
 }
 \description{
 Basic check: find people who are classifying the endpoints inconsistently or

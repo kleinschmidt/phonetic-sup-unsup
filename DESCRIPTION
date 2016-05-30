@@ -1,6 +1,6 @@
 Package: supunsup
 Title: Supervised/unsupervised adaptation analysis
-Version: 0.0.0.9000
+Version: 0.2.0
 Authors@R: as.person("Dave F. Kleinschmidt <dave.f.kleinschmidt@gmail.com> [aut, cre]")
 Description: Analysis of data from supervised/unsupervised phonetic
     adaptation study.
