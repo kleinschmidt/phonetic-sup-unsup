@@ -79,7 +79,8 @@ supunsup_to_stan_conj <- function(dat) {
   test_responses <- dat %>%
     group_by(subjNum, vot, respCat) %>%
     tally %>%
-    spread(key=respCat, value=n, fill=0)
+    spread(key=respCat, value=n, fill=0) %>%
+    ungroup()
 
   within(list(), {
     x <- dat$vot
