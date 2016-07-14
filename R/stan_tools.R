@@ -71,7 +71,7 @@ supunsup_to_stan_conj <- function(dat) {
 
   dat %>%
     filter(supCond == 'unsupervised') %>%
-    mutate(trueCat = respCategory,
+    mutate(trueCat = factor(trueCat),
            subjNum = as.numeric(factor(subject)),
            trueCatNum = as.numeric(trueCat),
            respCatNum = as.numeric(respCat))
