@@ -3,7 +3,7 @@
 \docType{data}
 \name{supunsup}
 \alias{supunsup}
-\title{Supunsup}
+\title{Supervised/unserupvised phonetic adaptation (Experiment 1)}
 \format{A data frame with 89,244 observations of 28 variables:
 \describe{
 \item{\code{subject}}{Anonymized MTurk worker identifier}
@@ -59,6 +59,8 @@ hears a different distribution of VOTs and classifies each one as a /b/ or a
 (beach/peach, bees/peas, and beak/peak).  On each trial, the subject hears a
 word from one of these pairs with a VOT drawn from their specific
 distribution, and click on a picture to indicate the word they heard.
+
+Subjects excluded from analysis are described in \code{\link{excludes}}.
 
 There are two, crossed conditions:
 

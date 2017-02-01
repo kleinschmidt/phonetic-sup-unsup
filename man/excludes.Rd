@@ -3,7 +3,7 @@
 \docType{data}
 \name{excludes}
 \alias{excludes}
-\title{Excludes}
+\title{Subjects excluded from analysis (Experiment 1)}
 \format{A data frame with 8 variables:
 \describe{
 \item{\code{subject}}{Anonymized MTurk worker identifier}

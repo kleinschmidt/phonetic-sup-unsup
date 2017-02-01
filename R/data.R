@@ -1,5 +1,5 @@
 
-#' Excludes
+#' Subjects excluded from analysis (Experiment 1)
 #'
 #' Subjects excluded from analysis because they previously participated, or
 #' because they didn't consistently classify the 0ms or 70ms VOT stimuli
@@ -23,7 +23,7 @@
 #' }
 "excludes"
 
-#' Supunsup
+#' Supervised/unserupvised phonetic adaptation (Experiment 1)
 #'
 #' The whole dataset, parsed by \code{\link{load_and_parse}}.
 #'
@@ -33,6 +33,8 @@
 #' (beach/peach, bees/peas, and beak/peak).  On each trial, the subject hears a
 #' word from one of these pairs with a VOT drawn from their specific
 #' distribution, and click on a picture to indicate the word they heard.
+#'
+#' Subjects excluded from analysis are described in \code{\link{excludes}}.
 #'
 #' There are two, crossed conditions:
 #'
@@ -111,14 +113,14 @@
 #' 
 "supunsup"
 
-#' Supunsup_clean
+#' Non-excluded assignments (Expt. 1)
 #'
-#' The clean \code{\link{supunsup}} data set, with excluded assignments removed.
+#' @seealso Format described in \code{\link{supunsup}}
 "supunsup_clean"
 
-#' Supunsup_excluded
+#' Data from excluded assignments (Expt. 1)
 #'
-#' Data from excluded assignments in \code{\link{supunsup}}.
+#' @seealso Format described in \code{\link{supunsup}}
 "supunsup_excluded"
 
 #' Some reasonable priors on category means/variances
@@ -142,7 +144,7 @@
 #' }
 "prior_stats"
 
-#' Separate means dataset.
+#' Supervised/unsupervised phonetic adaptation (Experiment 2)
 #'
 #' Data from a follow-up experiment that manipulated /b/ and /p/ mean VOTs
 #' separately, using only unsupervised distributional learning. There are five
@@ -156,6 +158,9 @@
 #' an additional test phase after the main part of the experiment, where
 #' subjects classify a flat continuum from -10ms to 50ms VOT, repeated 10 times
 #' each.
+#'
+#' Subjects classifying at less than 80% accuracy as extrapolated by a GLM at
+#' -10 and 80ms VOT are excluded in \code{separatemeans_clean}.
 #'
 #' @format The main dataset is a data.frame/tbl_df with 36,208
 #'   observations of 57 variables.  It has the columns from
@@ -183,14 +188,17 @@
 #'   }
 "separatemeans"
 
-#' Subjects classifying at less than 80% accuracy as extrapolated by a GLM at
-#' -10 and 80ms VOT are excluded
+#' Data from non-excluded assignments (Expt. 2)
 #'
-#' @rdname separatemeans
+#' @seealso Format described in \code{\link{separatemeans}}
 "separatemeans_clean"
 
-#' @rdname separatemeans
+#' Data from excluded assignments (Expt. 2)
+#'
+#' @seealso Format described in \code{\link{separatemeans}}
 "separatemeans_excluded"
 
-#' @rdname separatemeans
+#' Summary of all Experiment 2 assignments
+#'
+#' @seealso Format described in \code{\link{separatemeans}}
 "separatemeans_assignments"

@@ -3,10 +3,7 @@
 \docType{data}
 \name{separatemeans}
 \alias{separatemeans}
-\alias{separatemeans_assignments}
-\alias{separatemeans_clean}
-\alias{separatemeans_excluded}
-\title{Separate means dataset.}
+\title{Supervised/unsupervised phonetic adaptation (Experiment 2)}
 \format{The main dataset is a data.frame/tbl_df with 36,208
   observations of 57 variables.  It has the columns from
   \code{\link{supunsup}}, plus
@@ -33,12 +30,6 @@
   }}
 \usage{
 separatemeans
-
-separatemeans_clean
-
-separatemeans_excluded
-
-separatemeans_assignments
 }
 \description{
 Data from a follow-up experiment that manipulated /b/ and /p/ mean VOTs
@@ -48,15 +39,15 @@ dataset (with random responders removed) is \code{separatemeans_clean}, and
 the excluded data is in \code{separatemeans_excluded}. Assignment metadata
 (including audioequipment and useragent is in
 \code{separatemeans_assignments}
-
-Subjects classifying at less than 80% accuracy as extrapolated by a GLM at
--10 and 80ms VOT are excluded
 }
 \details{
 Because of the greater separation between clusters this introduces, there's
 an additional test phase after the main part of the experiment, where
 subjects classify a flat continuum from -10ms to 50ms VOT, repeated 10 times
 each.
+
+Subjects classifying at less than 80% accuracy as extrapolated by a GLM at
+-10 and 80ms VOT are excluded in \code{separatemeans_clean}.
 }
 \keyword{datasets}
 

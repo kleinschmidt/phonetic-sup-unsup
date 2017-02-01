@@ -3,13 +3,16 @@
 \docType{data}
 \name{supunsup_clean}
 \alias{supunsup_clean}
-\title{Supunsup_clean}
+\title{Non-excluded assignments (Expt. 1)}
 \format{An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 82362 rows and 27 columns.}
 \usage{
 supunsup_clean
 }
 \description{
-The clean \code{\link{supunsup}} data set, with excluded assignments removed.
+Non-excluded assignments (Expt. 1)
+}
+\seealso{
+Format described in \code{\link{supunsup}}
 }
 \keyword{datasets}
 
