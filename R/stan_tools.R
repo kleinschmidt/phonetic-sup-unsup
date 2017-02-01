@@ -69,7 +69,7 @@ supunsup_to_stan_mog <- function(dat) {
 #' @export
 supunsup_to_stan_conj <- function(dat) {
 
-  dat %>%
+  dat <- dat %>%
     filter(supCond == 'unsupervised') %>%
     mutate(trueCat = factor(trueCat),
            subjNum = as.numeric(factor(subject)),
